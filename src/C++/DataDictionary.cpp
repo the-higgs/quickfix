@@ -39,6 +39,7 @@
 namespace FIX {
 DataDictionary::DataDictionary()
     : m_hasVersion(false),
+      m_suppressAllFieldsChecking(false),
       m_checkFieldsOutOfOrder(true),
       m_checkFieldsHaveValues(true),
       m_checkUserDefinedFields(true),
@@ -47,6 +48,7 @@ DataDictionary::DataDictionary()
 
 DataDictionary::DataDictionary(std::istream &stream, bool preserveMsgFldsOrder) EXCEPT(ConfigError)
     : m_hasVersion(false),
+      m_suppressAllFieldsChecking(false),
       m_checkFieldsOutOfOrder(true),
       m_checkFieldsHaveValues(true),
       m_checkUserDefinedFields(true),
@@ -57,6 +59,7 @@ DataDictionary::DataDictionary(std::istream &stream, bool preserveMsgFldsOrder) 
 
 DataDictionary::DataDictionary(const std::string &url, bool preserveMsgFldsOrder) EXCEPT(ConfigError)
     : m_hasVersion(false),
+      m_suppressAllFieldsChecking(false),
       m_checkFieldsOutOfOrder(true),
       m_checkFieldsHaveValues(true),
       m_checkUserDefinedFields(true),
@@ -82,6 +85,7 @@ DataDictionary::~DataDictionary() {
 
 DataDictionary &DataDictionary::operator=(const DataDictionary &rhs) {
   m_hasVersion = rhs.m_hasVersion;
+  m_suppressAllFieldsChecking = rhs.m_suppressAllFieldsChecking;
   m_checkFieldsOutOfOrder = rhs.m_checkFieldsOutOfOrder;
   m_checkFieldsHaveValues = rhs.m_checkFieldsHaveValues;
   m_storeMsgFieldsOrder = rhs.m_storeMsgFieldsOrder;
@@ -133,6 +137,10 @@ void DataDictionary::validate(
       throw UnsupportedVersion();
     }
   }
+
+  if((pSessionDD !=0 && pSessionDD->m_suppressAllFieldsChecking) || 
+        (pAppDD != 0 && pAppDD->m_suppressAllFieldsChecking) )
+        return;
 
   int field = 0;
   if ((pSessionDD != 0 && pSessionDD->m_checkFieldsOutOfOrder) || (pAppDD != 0 && pAppDD->m_checkFieldsOutOfOrder)) {
